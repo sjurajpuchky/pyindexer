@@ -17,8 +17,8 @@ def parse_sitemap(home_url):
     return urls
 
 
-if len(sys.argv) < 4:
-    print("Usage: index-sitemap.py key.json https://www.nekde.cz 0")
+if len(sys.argv) < 5:
+    print("Usage: index-sitemap.py key.json https://www.nekde.cz 0 30000")
     exit(1)
 
 JSON_KEY_FILE = sys.argv[1]
@@ -34,9 +34,10 @@ urls = parse_sitemap(sys.argv[2])
 urls = list(set(urls))
 print('Found ' + str(len(urls)) + ' urls')
 counter = 0
+total = 0
 with alive_bar(len(urls), force_tty=True) as bar:
     for url in urls:
-        if counter >= int(sys.argv[3]):
+        if counter >= int(sys.argv[3]) and total <= int(sys.argv[4]):
             content = {}
             content['url'] = url
             content['type'] = 'URL_UPDATED'
@@ -45,5 +46,6 @@ with alive_bar(len(urls), force_tty=True) as bar:
             response, content = http.request(ENDPOINT, method="POST", body=json_content)
             print(content)
             result = json.loads(content.decode())
+            total += 1
         counter += 1
         bar()
